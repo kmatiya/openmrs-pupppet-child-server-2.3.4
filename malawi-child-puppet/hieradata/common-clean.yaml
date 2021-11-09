@@ -1,0 +1,33 @@
+sitename: common
+windows_openmrs_user: emradmin
+
+pih_home: 'c:\pih'
+puppet_install_home: 'c:\malawi-child-puppet'
+win_startup_menu: 'c:\ProgramData\Microsoft\Windows\Start Menu\Programs'
+mysql_root_user: root
+mysql_root_password: [MYSQL_ROOT_PASSWORD]
+openmrs_db: openmrs
+openmrs_db_user: [OPENMRS_DB_USER]
+openmrs_db_password: [OPENMRS_DB_PASSWORD]
+openmrs_scheduler_user: scheduler
+openmrs_scheduler_password: [OPENMRS_SCHEDULER_PASSWORD]
+
+ssh_parent_address: [UPDATE_SERVER_ADDRESS]
+ssh_user: [USER_NAME]
+ssh_port: [SSH_PORT]
+
+openmrs_pih_config: haiti-mentalhealth
+remote_zlidentifier_url: [URL]
+remote_zlidentifier_username: [USER_NAME]
+remote_zlidentifier_password: [USER_PASSWORD]
+
+label_clean_tomcat: 'Clean Tomcat'
+label_check_for_openmrs_updates: 'Check for OpenMRS updates'
+label_check_for_unsynced_records: 'Check for Unsynced records'
+label_prepare_child_server: 'Prepare Child Server'
+label_register_child_with_parent: 'Register Child With Parent'
+label_remove_changelock: 'Remove Changelock'
+label_unsynced_changes: 'Remove Unsynced Changes'
+label_shutdown_openmrs: 'Shutdown OpenMRS'
+label_start_openmrs: 'Start OpenMRS'
+desktop_shortcut_url: 'OpenMRS Sante mentale.url'

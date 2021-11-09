@@ -1,0 +1,93 @@
+@echo off
+
+echo.
+echo Connect to the parent server and retrieve the db
+
+echo Set connection variables
+rem ====================================================================================
+set PARENT_SERVER=<%= @ssh_parent_address %>
+set SSH_USER=<%= @ssh_user %>
+set SSH_PORT=<%= @ssh_port %>
+set SSH_KEY=<%= @ssh_key %>
+set SSH_CREDENTIALS=-i %SSH_KEY% -P %SSH_PORT% %SSH_USER%@%PARENT_SERVER%
+set GZIP_EXE=<%= @gzip_exe %>
+set PLINK_EXE=<%= @plink_exe %>
+set PSCP_EXE=<%= @pscp_exe %>
+set CONNECT_TO_SERVER=%PLINK_EXE% %SSH_CREDENTIALS%
+rem ====================================================================================
+echo Set Db connection properties
+rem ====================================================================================
+set DOWNLOAD_DB=<%= @download_db %>
+set MYSQL_EXE=<%= @mysql_exe %>
+set REMOTE_OPENMRS_DB_USER=<%= @mysql_root_user %>
+set REMOTE_OPENMRS_DB_PASSWORD=<%= @parent_mysql_db_password %>
+set LOCAL_OPENMRS_DB_USER=<%= @mysql_root_user %>
+set LOCAL_OPENMRS_DB_PASSWORD=<%= @mysql_root_password %>
+rem set OPENMRS_DB=openmrs
+set OPENMRS_DB=<%= @openmrs_db %>
+set REMOTE_DB_CREDENTIALS=-u %REMOTE_OPENMRS_DB_USER% -p%REMOTE_OPENMRS_DB_PASSWORD% %OPENMRS_DB%
+set LOCAL_DB_CREDENTIALS=-u %LOCAL_OPENMRS_DB_USER% -p%LOCAL_OPENMRS_DB_PASSWORD%
+set REMOTE_DB_CONNECTION=mysql %REMOTE_DB_CREDENTIALS%
+set DROP_AND_CREATE_DB_SCRIPT=<%= @openmrs_create_db_sql %>
+set DELETE_SYNC_TABLES_DB_SCRIPT=<%= @delete_sync_tables_sql %>
+set UPDATE_CHILD_SERVER_DB_SCRIPT=<%= @update_child_server_settings_sql %>
+set UPDATE_PARENT_SERVER_DB_SCRIPT=<%= @update_parent_server_settings_sql %>
+set SERVER_UUID_TEXT_FILE=<%= @server_uuid_text_file %>
+set LOCAL_OPENMRS_MODULES=<%= @pih_openmrs_modules %>
+set LOCAL_OPENMRS_WORKFLOW=<%= @pih_openmrs_workflow %>
+set LOCAL_OPENMRS_WAR=<%= @pih_openmrs_war %>
+set LOGFILE=sync.log
+set PIH_HOME_BIN=<%= @pih_home_bin %>
+set PIH_HOME_OPENMRS=<%= @pih_openmrs_home %>
+
+echo Connect to the parent server
+:CONNECT_TO_PARENT_SSH_SERVER
+echo y | %CONNECT_TO_SERVER% exit
+echo y | %CONNECT_TO_SERVER% "ls -al"
+if "%ERRORLEVEL%" == "0" GOTO STOP_TOMCAT 
+echo Error Connecting to the parent server 
+exit 1
+
+:STOP_TOMCAT
+rem stop Tomcat openmrs web app
+echo Stop Tomcat openmrs web app
+net stop Tomcat7
+
+:DOWNLOAD_OPENMRS_MODULES
+rem download openmrs modules from the parent ===========================================================
+echo Step 8/10: Download OpenMRS modules from parent server
+del /F /Q %LOCAL_OPENMRS_MODULES%\*
+%PSCP_EXE% %SSH_CREDENTIALS%:/home/%SSH_USER%/modules/* %LOCAL_OPENMRS_MODULES%
+if "%ERRORLEVEL%" == "0" GOTO DOWNLOAD_OPENMRS_WAR 
+echo Failed to download  openmrs modules from parent
+
+:DOWNLOAD_OPENMRS_WAR
+rem download openmrs war from the parent ===========================================================
+echo Step 9/10: Download openmrs war from the parent
+echo First, attempt to delete existing war file:
+del /F /Q %LOCAL_OPENMRS_WAR%
+%PSCP_EXE% %SSH_CREDENTIALS%:/home/%SSH_USER%/webapps/openmrs.war %LOCAL_OPENMRS_WAR%
+if "%ERRORLEVEL%" == "0" GOTO DOWNLOAD_WORKFLOW_APP 
+echo Failed to download  openmrs war from parent
+
+:DOWNLOAD_WORKFLOW_APP
+rem download workflow app from the parent ===========================================================
+echo Step 10: Download openmrs war from the parent
+echo First, attempt to delete existing workflow app:
+rmdir /S /Q %LOCAL_OPENMRS_WORKFLOW%
+mkdir %LOCAL_OPENMRS_WORKFLOW%
+%PSCP_EXE% -r %SSH_CREDENTIALS%:/home/%SSH_USER%/webapps/workflow/* %LOCAL_OPENMRS_WORKFLOW%
+if "%ERRORLEVEL%" == "0" GOTO START_TOMCAT 
+echo Failed to download  workflow from parent
+
+:START_TOMCAT
+rem start Tomcat openmrs web app
+echo Step 11: Start Tomcat openmrs web app
+net start Tomcat7
+
+echo wait 30 seconds for Tomcat to start
+ping -w 1000 -n 30 127.0.0.1 1
+%PIH_HOME_BIN%\tail.exe -f %PIH_HOME_OPENMRS%\openmrs.log
+
+:END
+echo Installing OpenMRS finished

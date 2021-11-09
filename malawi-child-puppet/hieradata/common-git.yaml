@@ -1,0 +1,35 @@
+sitename: common
+windows_openmrs_user: openmrs
+sync_parent_name: parent-lisungwi-reporting
+sync_parent_address: 'https://172.16.1.4/openmrs'
+sync_parent_uuid: 'SYNC_PARENT_UUID'
+sync_parent_user_name: '[SYNC_USER_NAME]'
+sync_parent_user_password: '[SYNC_USER_PASSWORD]'
+sync_admin_email: [SYNC_ADMN_EMAIL]
+pih_home: 'c:\pih'
+puppet_install_home: 'c:\malawi-child-puppet'
+win_startup_menu: 'c:\ProgramData\Microsoft\Windows\Start Menu\Programs'
+mysql_root_user: root
+mysql_root_password: [MYSQL_ROOT_PASSWORD]
+openmrs_db: openmrs
+openmrs_db_user: [OPENMRS_DB_USER]
+openmrs_db_password: [OPENMRS_DB_PASSWORD]
+download_db: true
+ssh_parent_address: 172.16.1.4
+parent_mysql_db_password: [PARENT_MYSQL_PASSWORD]
+ssh_user: [SSH_USER]
+ssh_port: 22
+artifacts_url: 'https://bamboo.pih-emr.org:81/artifacts/'
+artifacts_modules_url: 'https://bamboo.pih-emr.org:81/malawi-repo/modules.zip'
+ic3_app_artifact: openmrs-pwa-apzu-ic3.tar.gz
+label_clean_tomcat: 'Clean Tomcat'
+label_check_for_unsynced_records: 'Check for Unsynced records'
+label_prepare_child_server: 'Prepare Child Server'
+label_register_child_with_parent: 'Register Child With Parent'
+label_remove_changelock: 'Remove Changelock'
+label_unsynced_changes: 'Remove Unsynced Changes'
+label_shutdown_openmrs: 'Shutdown OpenMRS'
+label_start_openmrs: 'Start OpenMRS'
+label_refresh_ic3_screening_app: 'Refresh IC3 App'
+label_download_modules_from_test: 'Download OpenMRS modules from test server'
+label_refresh_openmrs_app: 'Refresh OpenMRS App'

@@ -1,0 +1,22 @@
+@echo off
+
+set PIH_HOME_BIN=<%= @pih_home_bin %>
+set ARTIFACTS_MODULES_URL=<%= @artifacts_modules_url %>
+set PIH_HOME_OPENMRS=<%= @pih_openmrs_home %>
+
+cd %PIH_HOME_BIN%
+
+del /S /Q %PIH_HOME_BIN%\modules.zip
+%PIH_HOME_BIN%\wget.exe %ARTIFACTS_MODULES_URL% .
+@For /D %%I in (%PIH_HOME_BIN%\pihmalawi-distribution*) DO RD /s /q %%I
+jar -xvf modules.zip
+cd pihmalawi-distribution*
+net stop Tomcat7
+del /S /Q %PIH_HOME_OPENMRS%\modules\*.omod
+xcopy *.omod %PIH_HOME_OPENMRS%\modules\ /Y /I
+net start Tomcat7
+echo wait 30 seconds for Tomcat to start
+ping -w 1000 -n 30 127.0.0.1
+
+%PIH_HOME_BIN%\tail.exe -f %PIH_HOME_OPENMRS%\openmrs.log
+pause

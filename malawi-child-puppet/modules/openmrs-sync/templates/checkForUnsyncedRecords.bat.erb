@@ -1,0 +1,41 @@
+@echo off
+
+echo.
+echo Checks for unsynced records
+
+
+rem ====================================================================================
+echo Set Db connection properties
+rem ====================================================================================
+set MYSQL_EXE=<%= @mysql_exe %>
+set LOCAL_OPENMRS_DB_USER=<%= @mysql_root_user %>
+set LOCAL_OPENMRS_DB_PASSWORD=<%= @mysql_root_password %>
+set OPENMRS_DB=<%= @openmrs_db %>
+set LOCAL_DB_CREDENTIALS=-u %LOCAL_OPENMRS_DB_USER% -p%LOCAL_OPENMRS_DB_PASSWORD%
+set LOGFILE=sync.log
+
+rem sanity checks for local uncommitted sync_records =========================
+%MYSQL_EXE% %LOCAL_DB_CREDENTIALS% %OPENMRS_DB% -e "select record_id from sync_record where state <> 'COMMITTED' and state <> 'NOT_SUPPOSED_TO_SYNC';" > sync_record.dump
+set count=0
+for /f "usebackq delims=" %%a in (sync_record.dump) do set /a count+=1
+del sync_record.dump
+if %count% LSS 2 goto :NO_SYNC_RECORDS_FOUND
+echo. 
+echo Unsynchronized changes in child server available >> %LOGFILE%
+echo.
+echo ERROR checking clean child server. 
+echo Local, unsynchronized changes are present on this child server.
+echo.
+echo Make sure to synchronize first.
+echo 1. Synchronize through OpenMRS Child server
+echo 2. Run prepare_child_server again
+echo.
+echo Exiting now
+pause
+exit 1
+
+:NO_SYNC_RECORDS_FOUND
+echo.
+echo No unsynced records found
+echo.
+pause

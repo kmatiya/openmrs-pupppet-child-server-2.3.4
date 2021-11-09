@@ -1,0 +1,5 @@
+net start Tomcat7
+echo wait 30 seconds for Tomcat to start
+ping -w 1000 -n 30 127.0.0.1
+
+<%= @tail_exe %> -f <%= @pih_openmrs_home %>\openmrs.log

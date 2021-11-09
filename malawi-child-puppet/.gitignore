@@ -1,0 +1,14 @@
+*.msi
+*.zip
+*.war
+*.exe
+*.DS_Store
+bin/*
+hieradata/common.yaml
+hieradata/lisungwi-common.yaml
+hieradata/neno-common.yaml
+hieradata/parent-neno-common.yaml
+modules/gzip/subinacl.exe
+modules/gzip/tail.exe
+modules/openmrs/files/modules/*
+*.iml

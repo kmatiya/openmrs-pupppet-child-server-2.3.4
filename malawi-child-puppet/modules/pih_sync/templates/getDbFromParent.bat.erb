@@ -1,0 +1,12 @@
+echo.
+echo Connect to the parent server and retrieve the db
+
+echo Set connection variables
+set PARENT_SERVER=74.50.57.218
+set SSH_USER = cioan
+set SSH_PORT = 22
+set SSH_KEY = c:\pih\putty\id_rsa
+set PLINK_EXE = c:\pih\putty\PLINK.EXE
+
+echo connect to the parent server
+PLINK_EXE -i SSH_KEY -P SSH_PORT SSH_USER@PARENT_SERVER "ls -al"

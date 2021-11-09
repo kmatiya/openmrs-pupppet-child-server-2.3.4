@@ -1,0 +1,57 @@
+@echo off
+
+echo.
+echo Update OpenMRS software
+
+set CYGWIN=nodosfilewarning
+set HOME=<%= @pih_cwrsync_home %>
+set PIH_HOME=<%= @pih_home %>
+set PIH_UPDATE_HOME=<%= @pih_update_home %>
+set PIH_TOMCAT_HOME=<%= @pih_tomcat_home %>
+set PIH_OPENMRS_HOME=<%= @pih_openmrs_home %>
+set SSH_KEY=<%= @ssh_key %>
+
+set PARENT_SERVER=<%= @ssh_parent_address %>
+set SSH_USER=<%= @ssh_user %>
+set SSH_PORT=<%= @ssh_port %>
+set RELEASE_REPOSITORY=<%= @release_repository %>
+set OPENMRS_UPDATE_FOLDER=<%= @pih_update_home_openmrs_linux %>
+
+:DOWNLOAD_LATEST_SOFTWARE
+rem download latest OpenMRS software ===========================================================
+echo Download latest OpenMRS software
+%HOME%\rsync.exe -aivvz --delete --progress -e "%HOME%\ssh.exe -i %SSH_KEY%" %SSH_USER%@%PARENT_SERVER%:%RELEASE_REPOSITORY% %OPENMRS_UPDATE_FOLDER%
+if "%ERRORLEVEL%" == "0" GOTO ASK_TO_UPDATE
+echo Error downloading latest OpenMRS software
+pause
+exit 1
+
+:ASK_TO_UPDATE
+echo Would you like to update OpenMRS software?(Y/N)
+set INPUT=
+set /P INPUT=Type input: %=%
+If /I "%INPUT%"=="y" goto UPDATE_OPENMRS 
+If /I "%INPUT%"=="n" goto NO
+echo Incorrect input & goto ASK_TO_UPDATE
+
+:UPDATE_OPENMRS
+rem update OpenMRS web app ===========================================================
+echo Update OpenMRS webapp
+cd %PIH_TOMCAT_HOME%\bin
+cmd.exe /c cleanTomcat.bat
+cd\
+del /F /Q /S %PIH_TOMCAT_HOME%\webapps\openmrs.war
+rmdir /S /Q %PIH_TOMCAT_HOME%\webapps\openmrs
+copy %PIH_UPDATE_HOME%\openmrs\openmrs.war %PIH_TOMCAT_HOME%\webapps\ /y
+del /F /Q /S %PIH_OPENMRS_HOME%modules\*.*
+rmdir /S /Q %PIH_OPENMRS_HOME%configuration
+copy %PIH_UPDATE_HOME%\openmrs\modules\*.omod %PIH_OPENMRS_HOME%modules\
+move %PIH_UPDATE_HOME%\openmrs\configuration %PIH_OPENMRS_HOME%
+net start tomcat7
+echo Press CTRL-C to exit
+echo wait 30 seconds for Tomcat to start
+ping -w 1000 -n 30 127.0.0.1
+%PIH_HOME%\bin\tail.exe -f %PIH_OPENMRS_HOME%\openmrs.log
+
+:NO
+pause

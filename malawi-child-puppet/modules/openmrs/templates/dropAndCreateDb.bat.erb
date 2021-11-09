@@ -1,0 +1,51 @@
+@echo off
+
+echo.
+echo Create local OpenMRS Database
+
+rem ====================================================================================
+echo Set Db connection properties
+rem ====================================================================================
+set MYSQL_EXE=<%= @mysql_exe %>
+set LOCAL_OPENMRS_DB_USER=<%= @mysql_root_user %>
+set LOCAL_OPENMRS_DB_PASSWORD=<%= @mysql_root_password %>
+set OPENMRS_DB=<%= @openmrs_db %>
+set OPENMRS_DB_HOME=<%= @pih_openmrs_db %>
+
+set LOCAL_DB_CREDENTIALS=-u %LOCAL_OPENMRS_DB_USER% -p%LOCAL_OPENMRS_DB_PASSWORD%
+set DROP_AND_CREATE_DB_SCRIPT=<%= @openmrs_create_db_sql %>
+
+:RECREATE_LOCAL_DB
+rem drop and recreate local DB ===========================================================
+echo Step 1/4: Drop and re-create local DB
+%MYSQL_EXE% %LOCAL_DB_CREDENTIALS% < %DROP_AND_CREATE_DB_SCRIPT%
+if "%ERRORLEVEL%" == "0" GOTO CHECK_OPENMRS_DB
+echo Error dropping and recreating local db
+pause
+exit 1
+
+:CHECK_OPENMRS_DB
+rem check if openmrs DB was imported before===========================================================
+echo Step 2/4: Check OpenMRS DB
+cd %OPENMRS_DB_HOME%
+%MYSQL_EXE% %LOCAL_DB_CREDENTIALS% %OPENMRS_DB% -e "use %OPENMRS_DB%; select count(*) from users;"
+if "%ERRORLEVEL%" == "0" GOTO START_TOMCAT
+echo importing OpenMRS db ...
+GOTO IMPORT_OPENMRS_DB
+
+:IMPORT_OPENMRS_DB
+rem import openmrs DB ===========================================================
+echo Step 3/4: Import OpenMRS DB
+cd %OPENMRS_DB_HOME%
+%MYSQL_EXE% %LOCAL_DB_CREDENTIALS% %OPENMRS_DB% < openmrs.sql
+if "%ERRORLEVEL%" == "0" GOTO START_TOMCAT
+echo Error importing local OpenMRS db
+pause
+exit 1
+
+:START_TOMCAT
+rem start Tomcat openmrs web app
+echo Step 4/4: Start Tomcat openmrs web app
+net start Tomcat7
+
+:END

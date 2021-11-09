@@ -1,0 +1,18 @@
+@echo off
+echo.
+echo This will reset the changeloglock table from OpenMRS.
+echo Only invoke this if you are requested to do so!
+echo.
+echo Press Ctrl-C to abort or
+pause
+rem ====================================================================================
+echo Set Db connection properties
+rem ====================================================================================
+set MYSQL_EXE=<%= @mysql_exe %>
+set LOCAL_OPENMRS_DB_USER=<%= @mysql_root_user %>
+set LOCAL_OPENMRS_DB_PASSWORD=<%= @mysql_root_password %>
+set OPENMRS_DB=<%= @openmrs_db %>
+set LOCAL_DB_CREDENTIALS=-u %LOCAL_OPENMRS_DB_USER% -p%LOCAL_OPENMRS_DB_PASSWORD%
+
+%MYSQL_EXE% %LOCAL_DB_CREDENTIALS% %OPENMRS_DB% -e "delete from liquibasechangeloglock;"
+pause
